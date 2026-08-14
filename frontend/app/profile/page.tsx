@@ -1,0 +1,4 @@
+"use client";
+import {useEffect,useState} from "react";import {api,setToken} from "../../lib/api";import {AppShell} from "../../components/app-shell";
+type Me={full_name:string;email:string;phone:string|null;role:string};
+export default function Profile(){const [me,setMe]=useState<Me|null>(null);useEffect(()=>{const t=sessionStorage.getItem('campusos_access');if(!t)return;setToken(t);api.get('/auth/me').then(r=>setMe(r.data.data))},[]);return <AppShell title="Profile"><div className="card" style={{maxWidth:550}}>{me?<><div className="avatar" style={{width:46,height:46,fontSize:15}}>{me.full_name.slice(0,2).toUpperCase()}</div><h2>{me.full_name}</h2><p className="subtle">{me.email}</p><table className="table"><tbody><tr><th>ROLE</th><td>{me.role}</td></tr><tr><th>PHONE</th><td>{me.phone||'Not provided'}</td></tr></tbody></table></>:<div className="empty">Loading profile…</div>}</div></AppShell>}

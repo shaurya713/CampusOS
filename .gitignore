@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+.next/
+out/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
