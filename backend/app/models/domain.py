@@ -44,8 +44,11 @@ class StaffProfile(Base):
     service_area: Mapped[str|None]=mapped_column(String(160))
     max_active_complaints: Mapped[int]=mapped_column(Integer,default=10,nullable=False)
     availability_status: Mapped[bool]=mapped_column(Boolean,default=True,nullable=False)
+<<<<<<< HEAD
     experience_years: Mapped[int]=mapped_column(Integer,default=0,nullable=False)
     working_hours: Mapped[str|None]=mapped_column(String(120))
+=======
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
     created_at: Mapped[datetime]=mapped_column(DateTime(timezone=True),server_default=func.now(),nullable=False)
     updated_at: Mapped[datetime]=mapped_column(DateTime(timezone=True),server_default=func.now(),onupdate=func.now(),nullable=False)
 
@@ -65,8 +68,11 @@ class Complaint(Base):
     status: Mapped[ComplaintStatus]=mapped_column(Enum(ComplaintStatus,name="complaint_status"),default=ComplaintStatus.SUBMITTED,nullable=False,index=True)
     ai_status: Mapped[str]=mapped_column(String(32),default="pending",nullable=False)
     resolution_note: Mapped[str|None]=mapped_column(Text)
+<<<<<<< HEAD
     image_url: Mapped[str|None]=mapped_column(String(500))
     video_url: Mapped[str|None]=mapped_column(String(500))
+=======
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
     created_at: Mapped[datetime]=mapped_column(DateTime(timezone=True),server_default=func.now(),nullable=False)
     updated_at: Mapped[datetime]=mapped_column(DateTime(timezone=True),server_default=func.now(),onupdate=func.now(),nullable=False)
 

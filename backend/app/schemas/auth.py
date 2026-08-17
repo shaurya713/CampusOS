@@ -9,9 +9,12 @@ class RegisterRequest(BaseModel):
     full_name: str = Field(min_length=2, max_length=160)
     email: EmailStr
     phone: str | None = Field(default=None, max_length=32)
+<<<<<<< HEAD
     government_id: str = Field(min_length=4, max_length=100)
     permanent_address: str = Field(min_length=10, max_length=500)
     profile_photo_url: str | None = Field(default=None, max_length=500)
+=======
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
     password: str = Field(min_length=8, max_length=128)
     student_id: str = Field(min_length=1, max_length=64)
     department: str = Field(min_length=1, max_length=100)
@@ -31,6 +34,7 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
+<<<<<<< HEAD
 class ProfileUpdateRequest(BaseModel):
     full_name: str = Field(min_length=2, max_length=160)
     phone: str | None = Field(default=None, max_length=32)
@@ -42,6 +46,11 @@ class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     role: Role
+=======
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
     token_type: str = "bearer"
 
 
@@ -55,9 +64,16 @@ class UserResponse(BaseModel):
     full_name: str
     email: EmailStr
     phone: str | None
+<<<<<<< HEAD
     profile_photo_url: str | None
     government_id: str | None
     permanent_address: str | None
     role: Role
     is_active: bool
     is_verified: bool
+=======
+    role: Role
+    is_active: bool
+    is_verified: bool
+
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546

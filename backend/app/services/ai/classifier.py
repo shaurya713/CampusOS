@@ -5,6 +5,7 @@ import re
 class Classification:
     category: str; subcategory: str; department: str; priority: str; urgency_score: int; confidence: float; reason: str; suggested_staff_type: str; provider_used: str="rule_based"; model_name: str|None=None; ai_status: str="fallback"; processing_time: float|None=None
 
+<<<<<<< HEAD
 RULES = [
     # Immediate hazards are checked first so a broad match never downgrades safety.
     (r"chemical spill|acid leak|toxic|biohazard", "Lab Safety", "Hazardous Material Incident", "CRITICAL", 10, "Hazmat Specialist"),
@@ -111,6 +112,15 @@ RULES = [
     (r"projector screen|whiteboard|noticeboard", "General Maintenance", "Classroom / Office Setup", "LOW", 3, "Handyman"),
     (r"flagpole|signage.*broken|broken signage|hoarding loose", "Civil Work", "Exterior Structures", "LOW", 3, "Handyman"),
     (r"noise complaint|loud music|disturbance", "General Administration", "Policy Compliance", "MEDIUM", 5, "Campus Admin"),
+=======
+RULES=[
+ (r"wire|shock|sparks?|fire|exposed", "Electrical", "Electrical Safety", "CRITICAL", 10, "Electrician"),
+ (r"leak|tap|drain|water|plumb", "Plumbing", "Water Leakage", "HIGH", 8, "Plumber"),
+ (r"electric|power|fan|light", "Electrical", "Power / Lighting", "HIGH", 7, "Electrician"),
+ (r"wifi|internet|computer|projector", "IT Support", "IT Equipment", "MEDIUM", 5, "IT Technician"),
+ (r"security|gate|theft", "Security", "Security Concern", "CRITICAL", 9, "Security Officer"),
+ (r"clean|garbage|waste", "Cleaning", "Cleaning", "MEDIUM", 4, "Cleaning Staff"),
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
 ]
 def classify(text: str) -> Classification:
     lowered=text.lower()

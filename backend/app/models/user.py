@@ -22,6 +22,7 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String(160), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     phone: Mapped[str | None] = mapped_column(String(32))
+<<<<<<< HEAD
     profile_photo_url: Mapped[str | None] = mapped_column(String(500))
     government_id: Mapped[str | None] = mapped_column(String(100), unique=True)
     permanent_address: Mapped[str | None] = mapped_column(String(500))
@@ -33,6 +34,10 @@ class User(Base):
         nullable=False,
         default=Role.STUDENT,
     )
+=======
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    role: Mapped[Role] = mapped_column(Enum(Role, name="user_role"), nullable=False, default=Role.STUDENT)
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     last_login: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .env
 .env.*
 !.env.example
@@ -10,3 +11,31 @@ node_modules/
 uploads/
 *.db
 
+=======
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+.next/
+out/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546

@@ -9,7 +9,11 @@ from app.core.security import hash_password
 from app.models.domain import Announcement, Category, Complaint, ComplaintAIAnalysis, ComplaintComment, ComplaintHistory, ComplaintStatus, Department, LostFoundItem, Notification, NotificationType, Priority, StaffProfile
 from app.models.user import Role, User
 from app.schemas.common import APIResponse
+<<<<<<< HEAD
 from app.schemas.domain import AnnouncementIn, AssignIn, CategoryIn, CategoryOut, CommentIn, ComplaintIn, ComplaintOut, ComplaintPriorityIn, ComplaintStatusIn, DepartmentIn, DepartmentOut, LostFoundIn, StaffIn, UserControlIn
+=======
+from app.schemas.domain import AnnouncementIn, AssignIn, CategoryIn, CategoryOut, CommentIn, ComplaintIn, ComplaintOut, ComplaintStatusIn, DepartmentIn, DepartmentOut, LostFoundIn, StaffIn
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
 from app.services.ai import classify
 from app.services.storage import save_upload
 
@@ -38,6 +42,7 @@ def create_category(payload:CategoryIn,db:DatabaseSession,_:User=admin()):
 
 @router.post("/staff",status_code=201)
 def create_staff(payload:StaffIn,db:DatabaseSession,_:User=admin()):
+<<<<<<< HEAD
     if db.scalar(select(User).where(or_(User.email==payload.email.lower(), User.government_id==payload.government_id))) or db.scalar(select(StaffProfile).where(StaffProfile.employee_id==payload.employee_id)):raise HTTPException(409,"Email, government ID or employee ID already exists")
     u=User(full_name=payload.full_name,email=payload.email.lower(),phone=payload.phone,government_id=payload.government_id,permanent_address=payload.permanent_address,profile_photo_url=payload.profile_photo_url,password_hash=hash_password(payload.password),role=Role.STAFF,is_verified=True);db.add(u);db.flush()
     d=payload.model_dump(exclude={"full_name","email","phone","password","government_id","permanent_address","profile_photo_url"}); db.add(StaffProfile(user_id=u.id,**d));db.commit();return {"data":{"id":str(u.id),"email":u.email}}
@@ -51,6 +56,11 @@ def list_staff(db: DatabaseSession, _: User = admin()):
 def experts(db: DatabaseSession, _: CurrentUser):
     rows = db.execute(select(User, StaffProfile, Department).join(StaffProfile, StaffProfile.user_id == User.id).outerjoin(Department, Department.id == StaffProfile.department_id).where(User.is_active, StaffProfile.availability_status).order_by(User.full_name)).all()
     return {"data": [{"id": str(user.id), "name": user.full_name, "phone": user.phone, "photo": user.profile_photo_url, "department": department.name if department else "Campus Services", "designation": profile.designation or "Campus Expert", "specialization": profile.specialization, "experience_years": profile.experience_years, "working_hours": profile.working_hours or "09:00 – 17:00"} for user, profile, department in rows]}
+=======
+    if db.scalar(select(User).where(User.email==payload.email.lower())) or db.scalar(select(StaffProfile).where(StaffProfile.employee_id==payload.employee_id)):raise HTTPException(409,"Email or employee ID already exists")
+    u=User(full_name=payload.full_name,email=payload.email.lower(),phone=payload.phone,password_hash=hash_password(payload.password),role=Role.STAFF,is_verified=True);db.add(u);db.flush()
+    d=payload.model_dump(exclude={"full_name","email","phone","password"}); db.add(StaffProfile(user_id=u.id,**d));db.commit();return {"data":{"id":str(u.id),"email":u.email}}
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
 
 @router.get("/complaints",response_model=APIResponse[list[ComplaintOut]])
 def complaints(db:DatabaseSession,user:CurrentUser,page:int=Query(1,ge=1),limit:int=Query(20,ge=1,le=100),search:str|None=None,status_filter:ComplaintStatus|None=None):
@@ -67,7 +77,11 @@ def create_complaint(payload:ComplaintIn,db:DatabaseSession,user:CurrentUser):
     result=classify(f"{payload.title} {payload.description}")
     category=db.scalar(select(Category).where(Category.name.ilike(result.category)))
     dept=db.scalar(select(Department).where(Department.name.ilike(result.department)))
+<<<<<<< HEAD
     item=Complaint(reference_no=f"CMP-{datetime.now():%Y%m%d}-{secrets.token_hex(3).upper()}",student_id=user.id,category_id=payload.category_id or (category.id if category else None),department_id=dept.id if dept else None,title=payload.title,description=payload.description,location=payload.location,building=payload.building,floor=payload.floor,room_number=payload.room_number,preferred_contact=payload.preferred_contact,image_url=payload.image_url,video_url=payload.video_url,priority=Priority(result.priority.lower()),status=ComplaintStatus.SUBMITTED,ai_status=result.ai_status)
+=======
+    item=Complaint(reference_no=f"CMP-{datetime.now():%Y%m%d}-{secrets.token_hex(3).upper()}",student_id=user.id,category_id=payload.category_id or (category.id if category else None),department_id=dept.id if dept else None,title=payload.title,description=payload.description,location=payload.location,building=payload.building,floor=payload.floor,room_number=payload.room_number,preferred_contact=payload.preferred_contact,priority=Priority(result.priority.lower()),status=ComplaintStatus.SUBMITTED,ai_status=result.ai_status)
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
     db.add(item);db.flush();db.add(ComplaintAIAnalysis(complaint_id=item.id,category=result.category,subcategory=result.subcategory,department=result.department,suggested_staff_type=result.suggested_staff_type,reason=result.reason,urgency_score=result.urgency_score,confidence=result.confidence,provider_used=result.provider_used,model_name=result.model_name,ai_status=result.ai_status));db.add(ComplaintHistory(complaint_id=item.id,new_status=item.status.value,changed_by=user.id,reason="Complaint submitted"));db.commit();db.refresh(item);return {"data":item}
 
 @router.get("/complaints/{complaint_id}",response_model=APIResponse[ComplaintOut])
@@ -84,12 +98,15 @@ def change_status(complaint_id:UUID,payload:ComplaintStatusIn,db:DatabaseSession
     if user.role==Role.STUDENT and payload.status!=ComplaintStatus.CANCELLED:raise HTTPException(403,"Students can only cancel a complaint")
     if user.role==Role.STUDENT and item.status not in (ComplaintStatus.SUBMITTED,ComplaintStatus.AI_ANALYZING):raise HTTPException(409,"Assigned complaints cannot be cancelled")
     old=item.status;item.status=payload.status;item.resolution_note=payload.resolution_note or item.resolution_note;db.add(ComplaintHistory(complaint_id=item.id,old_status=old.value,new_status=item.status.value,changed_by=user.id,reason=payload.reason));notify(db,item.student_id,NotificationType.COMPLAINT_STATUS_CHANGED,"Complaint status updated",f"{item.reference_no} is now {item.status.value.replace('_',' ')}",{"complaint_id":str(item.id)});db.commit();return {"data":{"status":item.status}}
+<<<<<<< HEAD
 
 @router.patch("/complaints/{complaint_id}/priority")
 def change_priority(complaint_id:UUID,payload:ComplaintPriorityIn,db:DatabaseSession,user:User=admin()):
     item=get_complaint(db,complaint_id); item.priority=payload.priority
     db.add(ComplaintHistory(complaint_id=item.id,old_status=item.status.value,new_status=item.status.value,changed_by=user.id,reason=payload.reason or f"Priority set to {payload.priority.value}")); db.commit()
     return {"data":{"priority":item.priority}}
+=======
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
 @router.get("/complaints/{complaint_id}/comments")
 def comments(complaint_id:UUID,db:DatabaseSession,user:CurrentUser):
     item=get_complaint(db,complaint_id);access(item,user);return {"data":list(db.scalars(select(ComplaintComment).where(ComplaintComment.complaint_id==item.id).order_by(ComplaintComment.created_at)).all())}
@@ -131,6 +148,7 @@ def analytics(db:DatabaseSession,_:User=admin()):
     by_priority={p.value:db.scalar(select(func.count()).select_from(Complaint).where(Complaint.priority==p)) or 0 for p in Priority}
     return {"data":{"total_complaints":total,"by_status":by_status,"by_priority":by_priority,"unassigned":db.scalar(select(func.count()).select_from(Complaint).where(Complaint.assigned_staff_id.is_(None))) or 0}}
 
+<<<<<<< HEAD
 @router.get("/reports/monthly")
 def monthly_report(db:DatabaseSession,user:CurrentUser):
     q=select(Complaint)
@@ -156,6 +174,8 @@ def control_user(user_id:UUID,payload:UserControlIn,db:DatabaseSession,admin_use
     if payload.is_verified is not None: target.is_verified=payload.is_verified
     db.commit(); return {"data":{"id":str(target.id),"is_active":target.is_active,"is_verified":target.is_verified}}
 
+=======
+>>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
 @router.post("/uploads/image",status_code=201)
 async def upload_image(file:UploadFile,user:CurrentUser): return {"data":{"url":await save_upload(file,"image")}}
 @router.post("/uploads/video",status_code=201)
