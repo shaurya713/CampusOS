@@ -1,0 +1,34 @@
+/* Auth pages must remain readable in narrow desktop windows and on phones. */
+.auth-card .split {
+  grid-template-columns: 1fr;
+}
+
+.auth-card input,
+.auth-card select {
+  min-width: 0;
+}
+
+@media (max-width: 980px) {
+  .auth-page {
+    padding: 16px;
+  }
+
+  .auth-frame {
+    grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1fr);
+  }
+
+  .auth-aside {
+    padding: 28px;
+  }
+
+  .auth-aside h1 {
+    margin-top: 36px;
+    font-size: 38px;
+  }
+}
+
+@media (max-width: 780px) {
+  .auth-page {
+    padding: 0;
+  }
+}

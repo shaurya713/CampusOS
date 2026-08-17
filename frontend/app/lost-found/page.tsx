@@ -1,0 +1,4 @@
+"use client";
+import {useEffect,useState} from "react";import {api} from "../../lib/api";import {AppShell} from "../../components/app-shell";
+type Item={id:string;title:string;type:string;category:string;location:string;description:string};
+export default function LostFound(){const [items,setItems]=useState<Item[]>([]);useEffect(()=>{api.get("/lost-found").then(r=>setItems(r.data.data))},[]);return <AppShell title="Lost & Found"><p className="subtle">Browse active reports from the campus community.</p><div className="grid">{items.map(x=><article className="card" key={x.id}><span className="badge">{x.type}</span><h3>{x.title}</h3><p className="subtle">{x.description}</p><small>{x.category} · {x.location}</small></article>)}{!items.length&&<div className="card empty">No active items yet.</div>}</div></AppShell>}

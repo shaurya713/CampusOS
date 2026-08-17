@@ -1,0 +1,4 @@
+"use client";
+import {useEffect,useState} from "react";import {api} from "../../lib/api";import {AppShell} from "../../components/app-shell";
+type Item={id:string;title:string;content:string;priority:string;created_at:string};
+export default function Announcements(){const [items,setItems]=useState<Item[]>([]);useEffect(()=>{api.get('/announcements').then(r=>setItems(r.data.data))},[]);return <AppShell title="Announcements"><div className="card">{items.map(x=><article key={x.id} style={{padding:'12px 0',borderBottom:'1px solid var(--line)'}}><div className="row"><h3 style={{margin:0}}>{x.title}</h3><span className="badge">{x.priority}</span></div><p className="subtle">{x.content}</p><small className="subtle">{new Date(x.created_at).toLocaleDateString()}</small></article>)}{!items.length&&<div className="empty">No announcements right now.</div>}</div></AppShell>}
