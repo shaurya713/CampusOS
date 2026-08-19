@@ -19,13 +19,9 @@ services:
       retries: 10
 
   backend:
-<<<<<<< HEAD
     build:
       context: ./backend
       dockerfile: Dockerfile
-=======
-    build: ./backend
->>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-campusos}:${POSTGRES_PASSWORD:-change-me}@postgres:5432/${POSTGRES_DB:-campusos}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-development-only-secret-change-before-deploying-12345}
@@ -39,13 +35,9 @@ services:
       - uploads_data:/app/uploads
 
   frontend:
-<<<<<<< HEAD
     build:
       context: ./frontend
       dockerfile: Dockerfile
-=======
-    build: ./frontend
->>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
     ports:

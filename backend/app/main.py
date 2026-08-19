@@ -5,11 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-<<<<<<< HEAD
-from app.core.exceptions import install_exception_handlers 
-=======
 from app.core.exceptions import install_exception_handlers
->>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
 from app.routers import auth, health, platform
 
 settings = get_settings()

@@ -1,100 +1,28 @@
-<<<<<<< HEAD
-"""Idempotent local-development seed data for CampusOS."""
 from app.core.security import hash_password
 from app.db.database import SessionLocal
-from app.models.domain import Category, Complaint, ComplaintAIAnalysis, ComplaintHistory, ComplaintStatus, Department, Priority, StaffProfile
-from app.models.user import Role, StudentProfile, User
-
-PASSWORD = "CampusOS123"
-DEPARTMENTS = ["Hostel", "Electrical", "Plumbing", "IT Support", "Transport", "Security", "Cleaning", "Library", "Infrastructure"]
-CATEGORIES = {"Electrical": ["Fan", "Light", "Power", "Electrical Hazard"], "Plumbing": ["Water Leakage", "Drainage", "Water Supply Issue"], "IT Support": ["WiFi", "Projector", "Network Connectivity"], "Hostel": ["Room Maintenance"], "Security": ["Security Breach", "Access Management"], "Cleaning": ["Waste Clearance", "Sanitation Cleaning"]}
-STAFF = [("Asha Mehta", "asha.mehta@campus.edu", "EMP-101", "Electrical", "Electrical Technician", ["Electrical", "Power", "Lighting"]), ("Ravi Kumar", "ravi.kumar@campus.edu", "EMP-102", "Plumbing", "Plumbing Technician", ["Plumbing", "Water Leakage", "Drainage"]), ("Neha Singh", "neha.singh@campus.edu", "EMP-103", "IT Support", "IT Support Specialist", ["WiFi", "Network", "Projector"]), ("Farhan Ali", "farhan.ali@campus.edu", "EMP-104", "Security", "Security Supervisor", ["Security", "Access Management"])]
-STUDENTS = [("Aarav Sharma", "aarav.sharma@campus.edu", "STU-2024-031", "Computer Science", 2, "A"), ("Meera Iyer", "meera.iyer@campus.edu", "STU-2024-044", "Electrical Engineering", 2, "B"), ("Kabir Khan", "kabir.khan@campus.edu", "STU-2023-118", "Mechanical Engineering", 3, "A"), ("Sana Kapoor", "sana.kapoor@campus.edu", "STU-2024-087", "Information Technology", 2, "C")]
-COMPLAINTS = [
-    ("CMP-2026-0001", 0, "Water leaking from hostel washroom tap", "The washroom tap in Block A room 214 has been leaking continuously since morning.", "Hostel Block A, Room 214", "Plumbing", "Water Leakage", "HIGH", "IN_PROGRESS", 1, "Ravi Kumar is scheduled to inspect the fitting today."),
-    ("CMP-2026-0002", 1, "Exposed wire near electrical panel", "A cable insulation is damaged near the corridor electrical panel outside Lab E-12.", "Engineering Block, Lab E-12", "Electrical", "Electrical Hazard", "CRITICAL", "ASSIGNED", 0, "Area secured and technician assigned for immediate inspection."),
-    ("CMP-2026-0003", 3, "Library Wi-Fi keeps disconnecting", "Wi-Fi disconnects every few minutes on the second floor reading area.", "Central Library, Second Floor", "IT Support", "Network Connectivity", "HIGH", "ACCEPTED", 2, "Network diagnostics have been started."),
-    ("CMP-2026-0004", 2, "Ceiling fan making loud noise", "The fan in the south hostel study room is vibrating and making a loud noise.", "South Hostel, Study Room 3", "Electrical", "Fan", "MEDIUM", "RESOLVED", 0, "Fan mounting and regulator were repaired."),
-    ("CMP-2026-0005", 0, "Overflowing waste bin outside cafeteria", "The bin near the cafeteria entrance has overflowed and needs clearance.", "Main Cafeteria Entrance", "Cleaning", "Waste Clearance", "MEDIUM", "SUBMITTED", None, "Awaiting housekeeping assignment."),
-    ("CMP-2026-0006", 1, "Projector not detecting HDMI input", "The projector in seminar room B is powered on but does not detect any HDMI source.", "Academic Block, Seminar Room B", "IT Support", "Projector", "MEDIUM", "ASSIGNED", 2, "AV technician assigned for the next available slot."),
-    ("CMP-2026-0007", 3, "Main gate access card reader is offline", "The entry card reader at the main gate does not respond to valid student cards.", "Main Gate", "Security", "Access Management", "HIGH", "IN_PROGRESS", 3, "Security team has moved to manual verification while the reader is checked."),
-]
-
-
-def get_user(db, full_name: str, email: str, role: Role) -> User:
-    user = db.query(User).filter_by(email=email).first()
-    if not user:
-        user = User(full_name=full_name, email=email, role=role, password_hash=hash_password(PASSWORD), is_verified=True)
-        db.add(user)
-        db.flush()
-    return user
-
-
-def main() -> None:
-    with SessionLocal() as db:
-        departments: dict[str, Department] = {}
-        for name in DEPARTMENTS:
-            department = db.query(Department).filter_by(name=name).first() or Department(name=name)
-            db.add(department); db.flush(); departments[name] = department
-        categories: dict[tuple[str, str], Category] = {}
-        for department_name, names in CATEGORIES.items():
-            for name in names:
-                category = db.query(Category).filter_by(name=name).first() or Category(name=name, subcategories=[], department_id=departments[department_name].id)
-                db.add(category); db.flush(); categories[(department_name, name)] = category
-        get_user(db, "Campus Operations Admin", "admin@campus.edu", Role.ADMIN)
-        staff_users: list[User] = []
-        for name, email, employee_id, department_name, designation, specialization in STAFF:
-            user = get_user(db, name, email, Role.STAFF); staff_users.append(user)
-            if not db.query(StaffProfile).filter_by(user_id=user.id).first(): db.add(StaffProfile(user_id=user.id, employee_id=employee_id, department_id=departments[department_name].id, designation=designation, specialization=specialization))
-        student_users: list[User] = []
-        for name, email, student_id, department_name, year, section in STUDENTS:
-            user = get_user(db, name, email, Role.STUDENT); student_users.append(user)
-            if not db.query(StudentProfile).filter_by(user_id=user.id).first(): db.add(StudentProfile(user_id=user.id, student_id=student_id, department_name=department_name, year=year, section=section))
-        for reference, student_index, title, description, location, department_name, category_name, priority, complaint_status, staff_index, note in COMPLAINTS:
-            if db.query(Complaint).filter_by(reference_no=reference).first(): continue
-            complaint = Complaint(reference_no=reference, student_id=student_users[student_index].id, assigned_staff_id=staff_users[staff_index].id if staff_index is not None else None, department_id=departments[department_name].id, category_id=categories[(department_name, category_name)].id, title=title, description=description, location=location, priority=Priority[priority], status=ComplaintStatus[complaint_status], ai_status="seeded")
-            db.add(complaint); db.flush()
-            db.add(ComplaintAIAnalysis(complaint_id=complaint.id, category=category_name, subcategory=category_name, department=department_name, suggested_staff_type="Campus Service Team", reason="Created as a realistic development record.", urgency_score=8 if priority in ("HIGH", "CRITICAL") else 5, confidence=.92, provider_used="seed", model_name="development", ai_status="seeded"))
-            db.add(ComplaintHistory(complaint_id=complaint.id, new_status=complaint_status.lower(), changed_by=student_users[student_index].id, reason=note))
-        db.commit()
-    print("Seed complete: 1 admin, 4 staff, 4 students, 7 realistic complaints.")
-    print(f"Development password for all seeded users: {PASSWORD}")
-
-
-if __name__ == "__main__": main()
-=======
-"""Seed a local CampusOS database with safe development credentials."""
-from app.core.security import hash_password
-from app.db.database import SessionLocal
-from app.models.domain import Category, Department, StaffProfile
-from app.models.user import Role, StudentProfile, User
-
+from app.models.domain import Category,Department,StaffProfile
+from app.models.user import Role,StudentProfile,User
 PASSWORD="CampusOS123"
-DEPARTMENTS=["Hostel","Electrical","Plumbing","IT Support","Transport","Security","Cleaning"]
-CATEGORIES={"Electrical":["Fan","Light","Power"],"Plumbing":["Water Leakage","Drainage"],"IT Support":["WiFi","Projector"],"Hostel":["Room Maintenance"]}
-
-def create_user(db,name,email,role):
-    user=db.query(User).filter_by(email=email).first()
-    if not user:
-        user=User(full_name=name,email=email,role=role,password_hash=hash_password(PASSWORD),is_verified=True);db.add(user);db.flush()
-    return user
-
+DEPTS=["Electrical","Plumbing","IT Support","Security","Cleaning","Hostel"]
+EXPERTS=[("Asha Mehta","asha.mehta@campus.edu","EMP-101","Electrical","Senior Electrical Technician",8,"08:00 – 16:00",["Lighting","Power","Safety"]),("Ravi Kumar","ravi.kumar@campus.edu","EMP-102","Plumbing","Plumbing Specialist",10,"09:00 – 17:00",["Leakage","Drainage","Water Supply"]),("Neha Singh","neha.singh@campus.edu","EMP-103","IT Support","IT & AV Specialist",6,"10:00 – 18:00",["Wi-Fi","Projector","Network"]),("Farhan Ali","farhan.ali@campus.edu","EMP-104","Security","Security Supervisor",9,"07:00 – 15:00",["Access","CCTV","Incident Response"]),("Priya Nair","priya.nair@campus.edu","EMP-105","Cleaning","Facilities Coordinator",7,"08:00 – 16:00",["Sanitation","Waste","Pest Coordination"])]
+def user(db,name,email,role,n):
+    x=db.query(User).filter_by(email=email).first()
+    if not x:x=User(full_name=name,email=email,phone=f"9000000{n:03}",government_id=f"SEED-ID-{n:03}",permanent_address="Campus Staff Residence, Main Campus",password_hash=hash_password(PASSWORD),role=role,is_verified=True);db.add(x);db.flush()
+    return x
 def main():
-    with SessionLocal() as db:
-        departments={}
-        for name in DEPARTMENTS:
-            x=db.query(Department).filter_by(name=name).first() or Department(name=name);db.add(x);db.flush();departments[name]=x
-        for dep,names in CATEGORIES.items():
-            for name in names:
-                if not db.query(Category).filter_by(name=name).first():db.add(Category(name=name,subcategories=[],department_id=departments[dep].id))
-        admin=create_user(db,"Campus Administrator","admin@campus.edu",Role.ADMIN)
-        for index,(name,dept) in enumerate((("Asha Electrician","Electrical"),("Ravi Plumber","Plumbing")),1):
-            staff=create_user(db,name,f"staff{index}@campus.edu",Role.STAFF)
-            if not db.query(StaffProfile).filter_by(user_id=staff.id).first():db.add(StaffProfile(user_id=staff.id,employee_id=f"EMP-{index:03}",department_id=departments[dept].id,designation="Service Technician",specialization=[dept]))
-        for index in range(1,6):
-            student=create_user(db,f"Student {index}",f"student{index}@campus.edu",Role.STUDENT)
-            if not db.query(StudentProfile).filter_by(user_id=student.id).first():db.add(StudentProfile(user_id=student.id,student_id=f"STU-{index:03}",department_name="Hostel",year=2,section="A"))
-        db.commit();print(f"Seed complete. Admin: admin@campus.edu / {PASSWORD}")
-
-if __name__=="__main__": main()
->>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
+  with SessionLocal() as db:
+    depts={}
+    for name in DEPTS:
+      d=db.query(Department).filter_by(name=name).first() or Department(name=name);db.add(d);db.flush();depts[name]=d
+    for dep,cat in [("Electrical","Electrical Hazard"),("Plumbing","Water Leakage"),("IT Support","Network & Devices"),("Security","Security & Access"),("Cleaning","Housekeeping")]:
+      if not db.query(Category).filter_by(name=cat).first():db.add(Category(name=cat,department_id=depts[dep].id,subcategories=[]))
+    user(db,"Campus Operations Admin","admin@campus.edu",Role.ADMIN,1)
+    for i,(name,email,eid,dep,title,years,hours,skills) in enumerate(EXPERTS,10):
+      u=user(db,name,email,Role.STAFF,i)
+      if not db.query(StaffProfile).filter_by(user_id=u.id).first():db.add(StaffProfile(user_id=u.id,employee_id=eid,department_id=depts[dep].id,designation=title,specialization=skills,experience_years=years,working_hours=hours))
+    for i,(name,email,sid,dep) in enumerate([("Aarav Sharma","aarav.sharma@campus.edu","STU-031","Computer Science"),("Meera Iyer","meera.iyer@campus.edu","STU-044","Electrical Engineering")],30):
+      u=user(db,name,email,Role.STUDENT,i)
+      if not db.query(StudentProfile).filter_by(user_id=u.id).first():db.add(StudentProfile(user_id=u.id,student_id=sid,department_name=dep,year=2,section="A"))
+    db.commit()
+  print("Seed complete: admin, 5 multidisciplinary experts and 2 students.")
+if __name__=="__main__":main()

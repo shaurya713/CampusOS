@@ -18,13 +18,8 @@ class Settings(BaseSettings):
     jwt_refresh_token_expire_days: int = Field(default=7, ge=1, le=90)
     frontend_url: str = "http://localhost:3000"
     upload_dir: Path = Path("./uploads")
-<<<<<<< HEAD
     max_image_size: int = 2 * 1024 * 1024
     max_video_size: int = 5 * 1024 * 1024
-=======
-    max_image_size: int = 5 * 1024 * 1024
-    max_video_size: int = 20 * 1024 * 1024
->>>>>>> 1b8878ef404f483e7609ab1c87da6c2e8c648546
     primary_ai_provider: str = "gemini"
     fallback_ai_provider: str = "openai"
     secondary_fallback_ai_provider: str = "deepseek"
